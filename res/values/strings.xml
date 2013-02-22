@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DashClock Google Voice Extension</string>
+    <string name="extension_title">Google Voice Messages</string>
+    <string name="extension_description">Displays new messages for Google Voice.</string>
+    <string name="settings_title">Accessibility Service Settings</string>
+    <string name="settings_description">This extension requires an accessibility service to monitor Google Voice notifications.
+ Tap to enter settings and enable the service under Accessibility -> DashClock Google Voice Extension.</string>
+    <string name="google_voice_package">com.google.android.apps.googlevoice</string>
+    <string name="authority">jh.dashclock.extension.googlevoice.provider</string>
+    <string name="accessibility_desc">This accessibility service will allow the extension to be notified when a new Google Voice notification arrives.
+ Since Google has not provided an API for Google Voice, this extension app requires an extra service to monitor new Google Voice notifications
+ as well as when the Google Voice app is entered.\n\nNo personal data is captured and transmitted for other purposes.
+ Note that this extension does not have permission to access Internet and other information
+ such as SMS and Email.</string>
+</resources>
