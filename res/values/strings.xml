@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ Copyright 2013 Jerry Hung
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
 <resources>
-    <string name="app_name">DashClock Google Voice Extension</string>
+    <string name="app_name">Google Voice for DashClock</string>
     <string name="extension_title">Google Voice Messages</string>
     <string name="extension_description">Displays new messages for Google Voice.</string>
-    <string name="settings_title">Accessibility Service Settings</string>
-    <string name="settings_description">This extension requires an accessibility service to monitor Google Voice notifications.
+    <string name="settings_title">Extension Settings</string>
+    <string name="settings_show_message_title">Show last received message</string>
+    <string name="settings_show_sender_title">Show sender</string>
+    <string name="settings_show_body_title">Show message body</string>
+    <string name="settings_accessibility_description">This extension requires an accessibility service to monitor Google Voice notifications.
  Tap to enter settings and enable the service under Accessibility -> DashClock Google Voice Extension.</string>
     <string name="google_voice_package">com.google.android.apps.googlevoice</string>
     <string name="authority">jh.dashclock.extension.googlevoice.provider</string>

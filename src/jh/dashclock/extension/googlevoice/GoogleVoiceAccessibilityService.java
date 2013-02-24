@@ -84,19 +84,19 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
 
     public String getSender() {
         // Message sender
-        if (TextUtils.isEmpty(text)) {
-            return "";
+        if (!TextUtils.isEmpty(text) && text.contains(":")) {
+            return text.split(":", 2)[0].trim();
         } else {
-            return text.split(": ")[0];
+            return "";
         }
     }
 
     public String getBody() {
         // Message body
-        if (TextUtils.isEmpty(text)) {
-            return "";
+        if (!TextUtils.isEmpty(text) && text.contains(":")) {
+            return text.split(":", 2)[1].trim();
         } else {
-            return text.split(": ")[1];
+            return "";
         }
     }
 

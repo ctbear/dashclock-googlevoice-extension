@@ -20,6 +20,9 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 import com.google.android.apps.dashclock.api.DashClockExtension;
@@ -34,6 +37,9 @@ import java.util.List;
 public class GoogleVoiceExtension extends DashClockExtension {
     public static final String TAG = "GoogleVoiceExtension";
     public static final String ACCESSIBILITY_SERVICE_TAG = GoogleVoiceAccessibilityService.TAG;
+    public static final String PREF_SHOW_MESSAGE = "pref_show_message";
+    public static final String PREF_SHOW_SENDER = "pref_show_sender";
+    public static final String PREF_SHOW_BODY = "pref_show_body";
 
     private GoogleVoiceAccessibilityService accessibilityService;
 
@@ -61,15 +67,38 @@ public class GoogleVoiceExtension extends DashClockExtension {
             Log.w(TAG, "Accessibility service is not on.");
             return;
         }
+
         int unreadCount = accessibilityService.getUnreadCount();
         final Intent googleVoiceIntent = getGoogleVoiceIntent();
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean showMessage = sp.getBoolean(PREF_SHOW_MESSAGE, true);
+        boolean showSender = sp.getBoolean(PREF_SHOW_SENDER, true);
+        boolean showBody = sp.getBoolean(PREF_SHOW_BODY, true);
+
+        String sender = "";
+        String body = "";
+        // Default body
+        if (unreadCount == 1) {
+            body = "1 Unread Message";
+        } else {
+            body = unreadCount + " Unread Messages";
+        }
+        if (showMessage) {
+            if (showSender) {
+                sender = "Last from: " + accessibilityService.getSender();
+            }
+            if (showBody) {
+                body = accessibilityService.getBody();
+            }
+        }
         // Publish the extension data update.
         publishUpdate(new ExtensionData()
                 .visible(unreadCount != 0)
                 .icon(R.drawable.google_voice)
                 .status("" + unreadCount)
-                .expandedTitle(accessibilityService.getBody())
-                .expandedBody("From: " + accessibilityService.getSender())
+                .expandedTitle(body)
+                .expandedBody(sender)
                 .clickIntent(googleVoiceIntent));
     }
 
