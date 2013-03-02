@@ -37,8 +37,6 @@ public class ExtensionSettingsActivity extends PreferenceActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_config);
-        Preference showMessagePreference = findPreference(GoogleVoiceExtension.PREF_SHOW_MESSAGE);
-        showMessagePreference.setOnPreferenceChangeListener(prefListener);
     }
 
     @Override
@@ -53,17 +51,7 @@ public class ExtensionSettingsActivity extends PreferenceActivity {
     private Preference.OnPreferenceChangeListener prefListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
-            if (preference.getKey().equals(GoogleVoiceExtension.PREF_SHOW_MESSAGE)) {
-                // Enable/disable other checkboxes
-                enableSenderBodyCheckboxes((Boolean) value);
-            }
-
             return true;
         }
     };
-
-    private void enableSenderBodyCheckboxes(boolean enabled) {
-        findPreference(GoogleVoiceExtension.PREF_SHOW_SENDER).setEnabled(enabled);
-        findPreference(GoogleVoiceExtension.PREF_SHOW_BODY).setEnabled(enabled);
-    }
 }

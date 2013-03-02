@@ -21,14 +21,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 import com.google.android.apps.dashclock.api.DashClockExtension;
 import com.google.android.apps.dashclock.api.ExtensionData;
 import jh.dashclock.extension.googlevoice.provider.MessageContentProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,8 +40,12 @@ public class GoogleVoiceExtension extends DashClockExtension {
     public static final String TAG = "GoogleVoiceExtension";
     public static final String ACCESSIBILITY_SERVICE_TAG = GoogleVoiceAccessibilityService.TAG;
     public static final String PREF_SHOW_MESSAGE = "pref_show_message";
+    public static final String PREF_STACK_MESSAGE = "pref_stack_message";
     public static final String PREF_SHOW_SENDER = "pref_show_sender";
     public static final String PREF_SHOW_BODY = "pref_show_body";
+    public static final String PREF_ALWAYS_SHOW = "pref_always_show";
+
+    private static final int MAX_STACKED_MESSAGE_LINES = 3;
 
     private GoogleVoiceAccessibilityService accessibilityService;
 
@@ -52,6 +58,7 @@ public class GoogleVoiceExtension extends DashClockExtension {
         if (!isReconnect) {
             addWatchContentUris(new String[] { MessageContentProvider.CONTENT_URI.toString() });
         }
+        setUpdateWhenScreenOn(true);
     }
 
     @Override
@@ -73,33 +80,35 @@ public class GoogleVoiceExtension extends DashClockExtension {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         boolean showMessage = sp.getBoolean(PREF_SHOW_MESSAGE, true);
+        boolean stackMessage = sp.getBoolean(PREF_STACK_MESSAGE, false);
         boolean showSender = sp.getBoolean(PREF_SHOW_SENDER, true);
         boolean showBody = sp.getBoolean(PREF_SHOW_BODY, true);
+        boolean alwaysShow = sp.getBoolean(PREF_ALWAYS_SHOW, false);
 
         String sender = "";
         String body = "";
-        // Default body
+        // Default message body
         if (unreadCount == 1) {
             body = "1 Unread Message";
         } else {
             body = unreadCount + " Unread Messages";
         }
-        if (showMessage) {
-            if (showSender) {
-                sender = "Last from: " + accessibilityService.getSender();
-            }
-            if (showBody) {
+        if (showMessage && unreadCount > 0) {
+            sender = processSender(stackMessage, showSender);
+            if (showBody && !stackMessage) {
                 body = accessibilityService.getBody();
             }
         }
         // Publish the extension data update.
-        publishUpdate(new ExtensionData()
-                .visible(unreadCount != 0)
+        ExtensionData data = new ExtensionData()
+                .visible(unreadCount != 0 || alwaysShow)
                 .icon(R.drawable.google_voice)
                 .status("" + unreadCount)
                 .expandedTitle(body)
                 .expandedBody(sender)
-                .clickIntent(googleVoiceIntent));
+                .clickIntent(googleVoiceIntent);
+        data.clean();
+        publishUpdate(data);
     }
 
     private Intent getGoogleVoiceIntent() {
@@ -123,6 +132,30 @@ public class GoogleVoiceExtension extends DashClockExtension {
             }
         }
         return false;
+    }
+
+    private String processSender(boolean stackMessage, boolean showSender) {
+        // Process expanded body based on options
+        if (stackMessage) {
+            List<String> messages = new ArrayList<String>();
+            List<String> allMessages = accessibilityService.getAllMessages();
+            int width = Utils.getDisplaySize(getBaseContext()).x;
+            for (String message : allMessages) {
+//                    messages.add(Utils.ellipsizeString(message, width));
+                messages.add(TextUtils.ellipsize(message, new TextPaint(), width / 3.5f,
+                        TextUtils.TruncateAt.END) + "");
+                if (messages.size() >= MAX_STACKED_MESSAGE_LINES
+                        && allMessages.size() > MAX_STACKED_MESSAGE_LINES) {
+                    messages.add("...");
+                    break;
+                }
+            }
+            return TextUtils.join("\n", messages);
+        } else if (showSender) {
+            return "Last from: " + accessibilityService.getSender();
+        } else {
+            return "";
+        }
     }
 }
 

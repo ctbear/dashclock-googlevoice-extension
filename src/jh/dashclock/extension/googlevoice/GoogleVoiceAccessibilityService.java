@@ -28,6 +28,7 @@ import jh.dashclock.extension.googlevoice.provider.MessageContentProvider;
 import jh.dashclock.extension.googlevoice.storage.MessageSQLiteHelper;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -40,6 +41,7 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
     private static boolean isInit = false;
     private static int unreadCount;
     private static String text;
+    private static List<String> allMessagesList;
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -51,9 +53,12 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
                 insert(event);
                 setUnreadCount(getCountFromProvider());
                 text = getLastMessageFromProvider();
+                allMessagesList = getAllMessagesFromProvider();
             } else if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 deleteAllRows();
                 setUnreadCount(getCountFromProvider());
+                text = "";
+                allMessagesList.clear();
             }
         }
     }
@@ -65,6 +70,7 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
             isInit = true;
             unreadCount = getCountFromProvider();
             text = getLastMessageFromProvider();
+            allMessagesList = getAllMessagesFromProvider();
         }
     }
 
@@ -85,7 +91,7 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
     public String getSender() {
         // Message sender
         if (!TextUtils.isEmpty(text) && text.contains(":")) {
-            return text.split(":", 2)[0].trim();
+            return Utils.parseSender(text);
         } else {
             return "";
         }
@@ -94,10 +100,14 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
     public String getBody() {
         // Message body
         if (!TextUtils.isEmpty(text) && text.contains(":")) {
-            return text.split(":", 2)[1].trim();
+            return Utils.parseBody(text);
         } else {
             return "";
         }
+    }
+
+    public List<String> getAllMessages() {
+        return allMessagesList;
     }
 
     private void insert(AccessibilityEvent event) {
@@ -127,6 +137,22 @@ public class GoogleVoiceAccessibilityService extends AccessibilityService {
         return getContentResolver().query(MessageContentProvider.CONTENT_URI,
                 new String[] { MessageSQLiteHelper.COLUMN_ID, MessageSQLiteHelper.COLUMN_MESSAGE }, null,
                 null, MessageSQLiteHelper.COLUMN_TIMESTAMP + " " + sortOrder);
+    }
+
+    private List<String> getAllMessagesFromProvider() {
+        List<String> allMessages = new LinkedList<String>();
+        Cursor cursor = getAllMessageCursor("DESC");
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                String message = cursor.getString(cursor.getColumnIndexOrThrow(MessageSQLiteHelper.COLUMN_MESSAGE));
+                allMessages.add(message);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+
+        return allMessages;
     }
 
     private void deleteAllRows() {

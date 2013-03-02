@@ -21,9 +21,11 @@
     <string name="extension_title">Google Voice Messages</string>
     <string name="extension_description">Displays new messages for Google Voice.</string>
     <string name="settings_title">Extension Settings</string>
-    <string name="settings_show_message_title">Show last received message</string>
-    <string name="settings_show_sender_title">Show sender</string>
-    <string name="settings_show_body_title">Show message body</string>
+    <string name="settings_show_message_title">Show messages</string>
+    <string name="settings_stack_message_title">Stack received messages</string>
+    <string name="settings_show_sender_title">Show last sender</string>
+    <string name="settings_show_body_title">Show last message body</string>
+    <string name="settings_always_show_title">Always show extension</string>
     <string name="settings_accessibility_description">This extension requires an accessibility service to monitor Google Voice notifications.
  Tap to enter settings and enable the service under Accessibility -> DashClock Google Voice Extension.</string>
     <string name="google_voice_package">com.google.android.apps.googlevoice</string>

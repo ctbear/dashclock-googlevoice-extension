@@ -18,22 +18,37 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Options">
-        <CheckBoxPreference android:key="pref_show_message"
-                            android:title="@string/settings_show_message_title"
-                            android:defaultValue="true"
-                            android:summaryOn="The last received message will be displayed."
-                            android:summaryOff="No messages will be displayed." />
+    <PreferenceCategory android:title="Message Options">
+        <SwitchPreference android:key="pref_show_message"
+                          android:title="@string/settings_show_message_title"
+                          android:defaultValue="true" />
+        <CheckBoxPreference android:key="pref_stack_message"
+                            android:title="@string/settings_stack_message_title"
+                            android:defaultValue="false"
+                            android:disableDependentsState="true"
+                            android:dependency="pref_show_message"
+                            android:summaryOn="All received messages will be stacked and displayed."
+                            android:summaryOff="Only the last received message will be displayed." />
         <CheckBoxPreference android:key="pref_show_sender"
                             android:title="@string/settings_show_sender_title"
                             android:defaultValue="true"
+                            android:dependency="pref_stack_message"
                             android:summaryOn="The sender of the last received message will be displayed."
                             android:summaryOff="The sender will not be displayed." />
         <CheckBoxPreference android:key="pref_show_body"
                             android:title="@string/settings_show_body_title"
                             android:defaultValue="true"
+                            android:dependency="pref_stack_message"
                             android:summaryOn="The last received message's body will be displayed."
                             android:summaryOff="The message body will not be displayed." />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Miscellaneous">
+        <CheckBoxPreference android:key="pref_always_show"
+                            android:title="@string/settings_always_show_title"
+                            android:defaultValue="false"
+                            android:summaryOn="The extension will always be shown."
+                            android:summaryOff="The extension will be hidden when notifications are cleared." />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Accessibility Service">
