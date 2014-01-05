@@ -51,12 +51,4 @@
                             android:summaryOff="The extension will be hidden when notifications are cleared." />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Accessibility Service">
-        <Preference android:title="Tap to launch Settings app"
-                    android:summary="@string/settings_accessibility_description">
-            <intent android:targetPackage="com.android.settings"
-                    android:targetClass="com.android.settings.Settings" />
-        </Preference>
-    </PreferenceCategory>
-
 </PreferenceScreen>

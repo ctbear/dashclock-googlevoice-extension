@@ -16,19 +16,21 @@
 
 package jh.dashclock.extension.googlevoice;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityService;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.accessibility.AccessibilityManager;
 import com.google.android.apps.dashclock.api.DashClockExtension;
 import com.google.android.apps.dashclock.api.ExtensionData;
 import jh.dashclock.extension.googlevoice.provider.MessageContentProvider;
+import jh.dashclock.extension.googlevoice.service.GoogleVoiceAccessibilityService;
+import jh.dashclock.extension.googlevoice.service.GoogleVoiceNotificationListenerService;
+import jh.dashclock.extension.googlevoice.service.IGoogleVoiceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,6 @@ import java.util.List;
  */
 public class GoogleVoiceExtension extends DashClockExtension {
     public static final String TAG = "GoogleVoiceExtension";
-    public static final String ACCESSIBILITY_SERVICE_TAG = GoogleVoiceAccessibilityService.TAG;
     public static final String PREF_SHOW_MESSAGE = "pref_show_message";
     public static final String PREF_STACK_MESSAGE = "pref_stack_message";
     public static final String PREF_SHOW_SENDER = "pref_show_sender";
@@ -47,35 +48,37 @@ public class GoogleVoiceExtension extends DashClockExtension {
 
     private static final int MAX_STACKED_MESSAGE_LINES = 3;
 
-    private GoogleVoiceAccessibilityService accessibilityService;
+    private IGoogleVoiceService service;
 
     @Override
     protected void onInitialize(boolean isReconnect) {
         super.onInitialize(isReconnect);
-        if (accessibilityService == null) {
-            accessibilityService = new GoogleVoiceAccessibilityService();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            service = new GoogleVoiceNotificationListenerService();
+        } else {
+            service = new GoogleVoiceAccessibilityService();
         }
         if (!isReconnect) {
-            addWatchContentUris(new String[] { MessageContentProvider.CONTENT_URI.toString() });
+            addWatchContentUris(new String[]{MessageContentProvider.CONTENT_URI.toString()});
         }
         setUpdateWhenScreenOn(true);
     }
 
     @Override
     public void onDestroy() {
-        if (accessibilityService != null) {
-            accessibilityService.onInterrupt();
+        if (service != null) {
+            service.destroy();
         }
     }
 
     @Override
     protected void onUpdateData(int reason) {
-        if (!accessibilityServiceOn()) {
-            Log.w(TAG, "Accessibility service is not on.");
+        if (!serviceOn()) {
+            Log.w(TAG, "Service is not on.");
             return;
         }
 
-        int unreadCount = accessibilityService.getUnreadCount();
+        int unreadCount = service.getUnreadCount(this);
         final Intent googleVoiceIntent = getGoogleVoiceIntent();
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
@@ -96,7 +99,7 @@ public class GoogleVoiceExtension extends DashClockExtension {
         if (showMessage && unreadCount > 0) {
             sender = processSender(stackMessage, showSender);
             if (showBody && !stackMessage) {
-                body = accessibilityService.getBody();
+                body = service.getBody(this);
             }
         }
         // Publish the extension data update.
@@ -122,26 +125,25 @@ public class GoogleVoiceExtension extends DashClockExtension {
         return intent;
     }
 
-    private boolean accessibilityServiceOn() {
-        AccessibilityManager manager = (AccessibilityManager) getApplicationContext()
-                .getSystemService(Context.ACCESSIBILITY_SERVICE);
-        List<AccessibilityServiceInfo> serviceInfoList = manager.getInstalledAccessibilityServiceList();
-        for (AccessibilityServiceInfo serviceInfo : serviceInfoList) {
-            if (serviceInfo.getId().contains(ACCESSIBILITY_SERVICE_TAG)) {
-                return true;
-            }
+    private boolean serviceOn() {
+        if (service == null) {
+            return false;
         }
-        return false;
+
+        if (service instanceof AccessibilityService) {
+            return Utils.isAccessibilityServiceOn(getApplicationContext());
+        }
+
+        return true;
     }
 
     private String processSender(boolean stackMessage, boolean showSender) {
         // Process expanded body based on options
         if (stackMessage) {
             List<String> messages = new ArrayList<String>();
-            List<String> allMessages = accessibilityService.getAllMessages();
+            List<String> allMessages = service.getAllMessages(this);
             int width = Utils.getDisplaySize(getBaseContext()).x;
             for (String message : allMessages) {
-//                    messages.add(Utils.ellipsizeString(message, width));
                 messages.add(TextUtils.ellipsize(message, new TextPaint(), width / 3.5f,
                         TextUtils.TruncateAt.END) + "");
                 if (messages.size() >= MAX_STACKED_MESSAGE_LINES
@@ -152,7 +154,7 @@ public class GoogleVoiceExtension extends DashClockExtension {
             }
             return TextUtils.join("\n", messages);
         } else if (showSender) {
-            return "Last from: " + accessibilityService.getSender();
+            return "Last from: " + service.getSender(this);
         } else {
             return "";
         }

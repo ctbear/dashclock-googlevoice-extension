@@ -16,6 +16,7 @@
 
 package jh.dashclock.extension.googlevoice;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -37,6 +38,11 @@ public class ExtensionSettingsActivity extends PreferenceActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_config);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            addPreferencesFromResource(R.xml.notification_listener_pref_config);
+        } else {
+            addPreferencesFromResource(R.xml.accessibility_service_pref_config);
+        }
     }
 
     @Override

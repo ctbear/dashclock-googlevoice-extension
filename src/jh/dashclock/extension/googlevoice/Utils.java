@@ -16,10 +16,15 @@
 
 package jh.dashclock.extension.googlevoice;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
+import jh.dashclock.extension.googlevoice.service.GoogleVoiceAccessibilityService;
+
+import java.util.List;
 
 /**
  * Utilities
@@ -49,5 +54,17 @@ public class Utils {
         Point size = new Point();
         display.getSize(size);
         return size;
+    }
+
+    public static boolean isAccessibilityServiceOn(Context context) {
+        AccessibilityManager manager = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> serviceInfoList =
+                manager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
+        for (AccessibilityServiceInfo serviceInfo : serviceInfoList) {
+            if (serviceInfo.getId().contains(GoogleVoiceAccessibilityService.TAG)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

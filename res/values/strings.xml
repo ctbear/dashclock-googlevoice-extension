@@ -26,8 +26,10 @@
     <string name="settings_show_sender_title">Show last sender</string>
     <string name="settings_show_body_title">Show last message body</string>
     <string name="settings_always_show_title">Always show extension</string>
-    <string name="settings_accessibility_description">This extension requires an accessibility service to monitor Google Voice notifications.
- Tap to enter settings and enable the service under Accessibility -> DashClock Google Voice Extension.</string>
+    <string name="settings_accessibility_description">Use the accessibility service to monitor Google Voice notifications.
+ Tap to enter Accessibility Service settings.</string>
+    <string name="settings_notification_listener_description">(Android 4.3+ only) Use the new Android 4.3 Notification Listener service API.
+ Recommended over the accessibility service. Tap to enter Notification Listener settings.</string>
     <string name="google_voice_package">com.google.android.apps.googlevoice</string>
     <string name="authority">jh.dashclock.extension.googlevoice.provider</string>
     <string name="accessibility_desc">This accessibility service will allow the extension to be notified when a new Google Voice notification arrives.

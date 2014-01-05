@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Accessibility Service">
+        <Preference android:title="Tap to launch Accessibility Service settings"
+                    android:summary="@string/settings_accessibility_description">
+            <intent android:action="android.settings.ACCESSIBILITY_SETTINGS" />
+        </Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen>
